@@ -1,14 +1,14 @@
 -- ============================================================
---  BROOKHAVEN TORNADO V10 — GUI COMPLETA
---  Nuvem + Descida · El Reno ajustado · Mobile-friendly
+--  BROOKHAVEN TORNADO V11 — GUI COMPLETA
+--  Nuvem visível em todos os EFs · El Reno · Mobile-friendly
 -- ============================================================
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Brookhaven Tornado V10",
-    LoadingTitle = "Carregando Tornado V10...",
-    LoadingSubtitle = "nuvem + descida · El Reno",
+    Name = "Brookhaven Tornado V11",
+    LoadingTitle = "Carregando Tornado V11...",
+    LoadingSubtitle = "nuvem visível · El Reno",
     Theme = "DarkBlue",
     ToggleUIKeybind = nil,
     ConfigurationSaving = { Enabled = false },
@@ -83,14 +83,19 @@ local function destruir()
 end
 
 -- ============================================================
--- NUVEM CUMULONIMBUS
+-- ☁️ NUVEM CUMULONIMBUS (corrigida — visível em TODOS os EFs)
 -- ============================================================
 local function criarNuvem(basePos, cloudY)
     nuvemFolder = Instance.new("Folder")
     nuvemFolder.Name = "Cumulonimbus"
     nuvemFolder.Parent = workspace
 
-    local tamBase = cfg.tamanho * 0.9
+    -- CORREÇÃO: tamanho mínimo de 500 studs (senão EFs pequenos ficam invisíveis)
+    local tamBase = math.max(cfg.tamanho, 500) * 0.9
+
+    -- CORREÇÃO: nuvem fica mais baixa pra ser visível
+    cloudY = basePos.Y + math.max(cfg.altura * 0.6, 300)
+
     local corBaixo = Color3.fromRGB(45, 45, 55)
     local corMeio  = Color3.fromRGB(70, 70, 80)
     local corTopo  = Color3.fromRGB(120, 120, 135)
@@ -189,7 +194,7 @@ local function criarTornado(basePos, tocarMusica)
     end
 
     tornadoFolder = Instance.new("Folder")
-    tornadoFolder.Name = "TornadoV10"
+    tornadoFolder.Name = "TornadoV11"
     tornadoFolder.Parent = workspace
 
     -- FUNIL
@@ -267,7 +272,7 @@ local function criarTornado(basePos, tocarMusica)
         })
     end
 
-    -- SOM DE VENTO (EFs normais)
+    -- SOM DE VENTO
     if not tocarMusica then
         somVento = Instance.new("Sound")
         somVento.SoundId = "rbxassetid://318451789"
@@ -401,7 +406,7 @@ RunService.Heartbeat:Connect(function(dt)
 end)
 
 -- ============================================================
--- PRESETS (El Reno ajustado pra 1200)
+-- PRESETS
 -- ============================================================
 local PRESETS = {
     EF1 = {tamanho=80, altura=400, velocidade=3, camadas=20, porAnel=8, destrocosQtd=10},
@@ -598,11 +603,4 @@ Tab:CreateSlider({
     Name = "Opacidade",
     Range = {0, 0.8}, Increment = 0.05,
     CurrentValue = 0.3, Flag = "Opac",
-    Callback = function(v) cfg.transparencia = v end,
-})
-
-Rayfield:Notify({
-    Title = "🌪️ Tornado V10 Carregado",
-    Content = "El Reno ajustado (1200 studs) + nuvem + descida!",
-    Duration = 6,
-})
+    Callback 
