@@ -22,14 +22,8 @@ local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 
--- ============================================================
--- 🎵 MÚSICA DO EL RENO
--- ============================================================
 local MUSICA_EL_RENO = "rbxassetid://1837224326"
 
--- ============================================================
--- CONFIG
--- ============================================================
 local cfg = {
     tamanho = 150,
     altura = 700,
@@ -61,14 +55,10 @@ local descidaOffset = 0
 local descidaAtiva = false
 local descidaVelAtual = 200
 
--- Ambiente
 Lighting.FogEnd = 200000
 Lighting.FogStart = 100000
 pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
 
--- ============================================================
--- LIMPEZA
--- ============================================================
 local function destruir()
     if tornadoFolder then tornadoFolder:Destroy() end
     if nuvemFolder then nuvemFolder:Destroy() end
@@ -82,18 +72,12 @@ local function destruir()
     descidaOffset = 0
 end
 
--- ============================================================
--- ☁️ NUVEM CUMULONIMBUS (corrigida — visível em TODOS os EFs)
--- ============================================================
 local function criarNuvem(basePos, cloudY)
     nuvemFolder = Instance.new("Folder")
     nuvemFolder.Name = "Cumulonimbus"
     nuvemFolder.Parent = workspace
 
-    -- CORREÇÃO: tamanho mínimo de 500 studs (senão EFs pequenos ficam invisíveis)
     local tamBase = math.max(cfg.tamanho, 500) * 0.9
-
-    -- CORREÇÃO: nuvem fica mais baixa pra ser visível
     cloudY = basePos.Y + math.max(cfg.altura * 0.6, 300)
 
     local corBaixo = Color3.fromRGB(45, 45, 55)
@@ -118,7 +102,6 @@ local function criarNuvem(basePos, cloudY)
         table.insert(nuvemData, {origX=pos.X, origY=pos.Y, origZ=pos.Z})
     end
 
-    -- Base (anvil escura)
     for i = 1, 14 do
         local ang = (i/14) * math.pi * 2
         local raio = tamBase * 0.9
@@ -130,7 +113,6 @@ local function criarNuvem(basePos, cloudY)
         )
     end
 
-    -- Meio (corpo)
     for i = 1, 20 do
         local ang = math.random() * math.pi * 2
         local raio = math.random() * tamBase * 0.85
@@ -143,7 +125,6 @@ local function criarNuvem(basePos, cloudY)
         )
     end
 
-    -- Topo (billowing)
     for i = 1, 10 do
         local ang = (i/10) * math.pi * 2
         local raio = tamBase * (0.4 + math.random() * 0.3)
@@ -156,7 +137,6 @@ local function criarNuvem(basePos, cloudY)
         )
     end
 
-    -- Fade-in
     task.spawn(function()
         for _, p in ipairs(nuvemParts) do
             p:SetAttribute("transpAlvo", p.Transparency)
@@ -174,9 +154,6 @@ local function criarNuvem(basePos, cloudY)
     end)
 end
 
--- ============================================================
--- CRIAR TORNADO
--- ============================================================
 local function criarTornado(basePos, tocarMusica)
     basePos = basePos or Vector3.new(0, 3, 0)
     centroX, centroZ = basePos.X, basePos.Z
@@ -197,7 +174,6 @@ local function criarTornado(basePos, tocarMusica)
     tornadoFolder.Name = "TornadoV11"
     tornadoFolder.Parent = workspace
 
-    -- FUNIL
     for i = 1, cfg.camadas do
         local fator = i / cfg.camadas
         local raio = cfg.tamanho * (0.15 + math.pow(fator, 0.75) * 0.85)
@@ -237,7 +213,6 @@ local function criarTornado(basePos, tocarMusica)
         end
     end
 
-    -- DESTROÇOS
     for i = 1, cfg.destrocosQtd do
         local obj = Instance.new("Part")
         local tipo = math.random(1, 4)
@@ -272,7 +247,6 @@ local function criarTornado(basePos, tocarMusica)
         })
     end
 
-    -- SOM DE VENTO
     if not tocarMusica then
         somVento = Instance.new("Sound")
         somVento.SoundId = "rbxassetid://318451789"
@@ -284,7 +258,6 @@ local function criarTornado(basePos, tocarMusica)
         somVento:Play()
     end
 
-    -- MÚSICA DO EL RENO
     if tocarMusica then
         somMusica = Instance.new("Sound")
         somMusica.SoundId = MUSICA_EL_RENO
@@ -302,7 +275,6 @@ local function criarTornado(basePos, tocarMusica)
         })
     end
 
-    -- LUZ
     luz = Instance.new("PointLight")
     luz.Brightness = 2
     luz.Range = cfg.tamanho * 2
@@ -314,23 +286,16 @@ local function criarTornado(basePos, tocarMusica)
     ativo = true
 end
 
--- ============================================================
--- WANDER
--- ============================================================
 local function escolherNovoAlvo()
     local ang = math.random() * math.pi * 2
     local dist = 500 + math.random() * 1000
     wanderTarget = Vector3.new(centroX + math.cos(ang)*dist, 0, centroZ + math.sin(ang)*dist)
 end
 
--- ============================================================
--- ANIMAÇÃO
--- ============================================================
 RunService.Heartbeat:Connect(function(dt)
     if not ativo or not tornadoFolder then return end
     local t = tick()
 
-    -- DESCIDA
     if descidaAtiva then
         descidaOffset = math.max(0, descidaOffset - descidaVelAtual * dt)
         if descidaOffset <= 0 then
@@ -339,7 +304,6 @@ RunService.Heartbeat:Connect(function(dt)
         end
     end
 
-    -- WANDER
     if cfg.wanderAtivo and not seguir and not descidaAtiva then
         wanderTimer = wanderTimer + dt
         if wanderTimer >= cfg.wanderTroca then
@@ -365,7 +329,6 @@ RunService.Heartbeat:Connect(function(dt)
         end
     end
 
-    -- FUNIL
     local n = #todasParts
     for i = 1, n do
         local d = todasData[i]
@@ -380,7 +343,6 @@ RunService.Heartbeat:Connect(function(dt)
         workspace:BulkMoveTo(todasParts, todasCFrames, Enum.BulkMoveMode.FireCFrameChanged)
     end
 
-    -- DESTROÇOS
     for i, obj in ipairs(destrocosParts) do
         local d = destrocosData[i]
         local a = d.a + t * d.vel * 0.05
@@ -392,7 +354,6 @@ RunService.Heartbeat:Connect(function(dt)
         ) * CFrame.Angles(t*d.spin, t*d.spin*1.3, t*d.spin*0.7)
     end
 
-    -- NUVEM SEGUE
     if nuvemFolder and not descidaAtiva then
         for i, p in ipairs(nuvemParts) do
             local d = nuvemData[i]
@@ -405,9 +366,6 @@ RunService.Heartbeat:Connect(function(dt)
     end
 end)
 
--- ============================================================
--- PRESETS
--- ============================================================
 local PRESETS = {
     EF1 = {tamanho=80, altura=400, velocidade=3, camadas=20, porAnel=8, destrocosQtd=10},
     EF2 = {tamanho=150, altura=600, velocidade=5, camadas=24, porAnel=9, destrocosQtd=15},
@@ -452,9 +410,6 @@ local function aplicarEF(nome, musica)
     })
 end
 
--- ============================================================
--- GUI
--- ============================================================
 Tab:CreateSection("🌪️ Spawnar Tornado")
 
 Tab:CreateButton({Name = "EF1 — Fraco (~80 studs)", Callback = function() aplicarEF("EF1", false) end})
@@ -603,4 +558,11 @@ Tab:CreateSlider({
     Name = "Opacidade",
     Range = {0, 0.8}, Increment = 0.05,
     CurrentValue = 0.3, Flag = "Opac",
-    Callback 
+    Callback = function(v) cfg.transparencia = v end,
+})
+
+Rayfield:Notify({
+    Title = "🌪️ Tornado V11 Carregado",
+    Content = "Nuvem agora visível em TODOS os EFs!",
+    Duration = 6,
+})
